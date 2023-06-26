@@ -25,6 +25,7 @@ class ContourPilot:
             self.Patient_dict = pat_dict
         else:
             self.Patient_dict = le.parse_dataset(data_path,img_only=True)
+#             print(self.Patient_dict)
         self.Patients_gen = Generator_v1.Patient_data_generator(self.Patient_dict, predict=True, batch_size=1, image_size=512,shuffle=True,  
                                       use_window = True, window_params=[1500,-600],resample_int_val = True, resampling_step =25,   #25
                                       extract_lungs=True, size_eval=False,verbosity=verbosity,reshape = True, img_only=True)
@@ -75,15 +76,16 @@ class ContourPilot:
 
                 predicted_array = self.__generate_segmentation__(img,params)
 
-                if not os.path.exists(os.path.join(self.Output_path,filename.split('\\')[-2]+'_(DL)')):
-                    os.makedirs(os.path.join(self.Output_path,filename.split('\\')[-2]+'_(DL)'))   
+                if not os.path.exists(os.path.join(self.Output_path, os.path.basename(os.path.dirname(filename)) + '_(DL)')):
+                    os.makedirs(os.path.join(self.Output_path, os.path.basename(os.path.dirname(filename)) + '_(DL)'))   
                 
                 generated_img = sitk.GetImageFromArray(predicted_array)
                 generated_img.SetSpacing(params['original_spacing'])
                 generated_img.SetOrigin(params['img_origin'])
-                sitk.WriteImage(generated_img,os.path.join(self.Output_path,filename.split('\\')[-2]+'_(DL)','DL_mask.nrrd')) 
+                sitk.WriteImage(generated_img,os.path.join(self.Output_path, os.path.basename(os.path.dirname(filename)) + '_(DL)', 'DL_mask.nrrd')) 
                 temp_data=sitk.ReadImage(filename)
-                sitk.WriteImage(temp_data,os.path.join(self.Output_path,filename.split('\\')[-2]+'_(DL)','image.nrrd'))
+                sitk.WriteImage(temp_data,os.path.join(self.Output_path, os.path.basename(os.path.dirname(filename)) + '_(DL)', 'image.nrrd'))
+
 
                 if count == len(self.Patients_gen):
                     return 0
